@@ -27,8 +27,8 @@ export default function RootLayout({
             <nav className="hidden md:flex items-center gap-6 h5-work-sans text-[16px]">
               <Link className="hover:opacity-80" href="/marketplace">Marketplace</Link>
               <Link className="hover:opacity-80" href="/playground">Playground</Link>
-              <Link className="hover:opacity-80" href="/avalanche">Avalanche</Link>
               <Link className="hover:opacity-80" href="/docs">Docs</Link>
+              <Link className="inline-flex items-center h-10 px-4 rounded-[20px] bg-[var(--background-secondary)]" href="/agents">Create Agent</Link>
               <ConnectWallet />
             </nav>
             <button className="md:hidden inline-flex items-center justify-center size-10 rounded-[14px] bg-[var(--background-secondary)]">

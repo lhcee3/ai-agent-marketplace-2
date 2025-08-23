@@ -3,6 +3,8 @@ export interface AgentMetadata {
   id: string;
   name: string;
   description: string;
+  /** Optional system prompt used to guide the agent's behavior */
+  systemPrompt?: string;
   image: string;
   endpoint: string;
   category: string;
