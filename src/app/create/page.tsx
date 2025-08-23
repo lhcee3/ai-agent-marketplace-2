@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ensureFujiNetwork, requestAccounts } from "@/lib/eth";
 import { AI_AGENT_NFT_ADDRESS, getWriteContract } from "@/lib/aiAgentNft";
+import { AI_AGENT_MARKETPLACE_ADDRESS, getListingFeeWei, listAgentForSale } from "@/lib/aiAgentMarketplace";
 
 export default function CreateAgentPage() {
   const [name, setName] = useState("");
@@ -13,6 +14,9 @@ export default function CreateAgentPage() {
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [tokenId, setTokenId] = useState<string | null>(null);
+  const [listAfterMint, setListAfterMint] = useState(false);
+  const [priceEth, setPriceEth] = useState("");
+  const [listingFeeEth, setListingFeeEth] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +65,19 @@ export default function CreateAgentPage() {
         } catch {}
       }
       setTokenId(mintedId);
-      // Optionally clear form after success
+      // Optionally list on marketplace
+      if (listAfterMint && mintedId) {
+        // fetch fee
+        try {
+          const fee = await getListingFeeWei();
+          setListingFeeEth((Number(fee) / 1e18).toString());
+        } catch {}
+        if (!priceEth) throw new Error("Enter a price to list");
+        const ltx = await listAgentForSale(AI_AGENT_NFT_ADDRESS, mintedId, priceEth);
+        await ltx.wait();
+      }
+
+      // Clear form after success
       setName("");
       setDescription("");
       setSystemPrompt("");
@@ -131,6 +147,38 @@ export default function CreateAgentPage() {
                     onChange={(e) => setImage(e.target.value)}
                   />
                   <p className="mt-2 text-xs text-[#858584]">Paste a link to a hosted image (PNG, JPG, SVG).</p>
+                </div>
+
+                {/* Optional list on marketplace */}
+                <div className="mt-2 rounded-[16px] border border-white/10 p-4">
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="size-4"
+                      checked={listAfterMint}
+                      onChange={(e) => setListAfterMint(e.target.checked)}
+                    />
+                    <span className="body-work-sans">List on marketplace after mint</span>
+                  </label>
+                  {listAfterMint && (
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 mt-3 items-end">
+                      <div>
+                        <label className="block body-space-mono text-sm text-[#c9c9c9] mb-2">Price (AVAX)</label>
+                        <input
+                          className="h-12 w-full rounded-[16px] px-4 bg-background text-white placeholder:text-[#858584] outline-none border border-white/10"
+                          placeholder="0.1"
+                          inputMode="decimal"
+                          value={priceEth}
+                          onChange={(e) => setPriceEth(e.target.value)}
+                          required
+                        />
+                        {listingFeeEth && (
+                          <p className="mt-2 text-xs text-[#858584]">Listing fee: {listingFeeEth} AVAX</p>
+                        )}
+                        <p className="mt-1 text-xs text-[#858584]">Marketplace: {AI_AGENT_MARKETPLACE_ADDRESS.slice(0,6)}…{AI_AGENT_MARKETPLACE_ADDRESS.slice(-4)}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {error && (

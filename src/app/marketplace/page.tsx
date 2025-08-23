@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { fetchRecentMintedAgents, type MintedAgent } from "@/lib/aiAgentNft";
+import { fetchAvailableListings, type ListingWithMetadata, buyListing } from "@/lib/aiAgentMarketplace";
 
 const CATEGORIES = [
   "Customer Support",
@@ -15,12 +15,14 @@ const CATEGORIES = [
 ] as const;
 
 type UiAgent = {
-  id: string;
+  listingId: string;
+  tokenId: string;
   name: string;
   image?: string;
   owner: string;
-  category?: string;
-  priceEth?: number;
+  priceEth: string;
+  nftContract: string;
+  priceWei: string;
 };
 
 export default function MarketplacePage() {
@@ -31,15 +33,16 @@ export default function MarketplacePage() {
   const pageSize = 12;
 
   const [loading, setLoading] = useState(true);
-  const [minted, setMinted] = useState<MintedAgent[]>([]);
+  const [listings, setListings] = useState<ListingWithMetadata[]>([]);
+  const [buyingId, setBuyingId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         setLoading(true);
-        const items = await fetchRecentMintedAgents(100);
-        if (mounted) setMinted(items);
+  const items = await fetchAvailableListings();
+  if (mounted) setListings(items);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -50,23 +53,27 @@ export default function MarketplacePage() {
   }, []);
 
   const data = useMemo(() => {
-    let d: UiAgent[] = minted.map((m) => ({
-      id: m.tokenId,
+    let d: UiAgent[] = listings.map((m) => ({
+      listingId: m.listingId,
+      tokenId: m.tokenId,
       name: m.metadata?.name || `Agent #${m.tokenId}`,
       image: m.metadata?.image,
-      owner: m.owner,
+      owner: m.seller,
+      priceEth: m.priceEth,
+      nftContract: m.nftContract,
+      priceWei: m.priceWei,
     }));
-    if (category !== "all") d = d.filter((a) => a.category === category);
+  // Category filtering not wired yet; keep 'all' for now
     if (query.trim()) {
       const q = query.toLowerCase();
       d = d.filter((a) => a.name.toLowerCase().includes(q) || a.owner.toLowerCase().includes(q));
     }
     switch (sort) {
       case "priceAsc":
-        d.sort((a, b) => (a.priceEth ?? Infinity) - (b.priceEth ?? Infinity));
+        d.sort((a, b) => Number(a.priceEth) - Number(b.priceEth));
         break;
       case "priceDesc":
-        d.sort((a, b) => (b.priceEth ?? -Infinity) - (a.priceEth ?? -Infinity));
+        d.sort((a, b) => Number(b.priceEth) - Number(a.priceEth));
         break;
       case "new":
         d = d.reverse();
@@ -75,7 +82,7 @@ export default function MarketplacePage() {
         break;
     }
     return d;
-  }, [category, query, sort, minted]);
+  }, [category, query, sort, listings]);
 
   const total = data.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -151,7 +158,7 @@ export default function MarketplacePage() {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {pageData.map((a) => (
-            <div key={a.id} className="rounded-[20px] overflow-hidden bg-[var(--background-secondary)]">
+            <div key={a.listingId} className="rounded-[20px] overflow-hidden bg-[var(--background-secondary)]">
               <div className="relative aspect-square bg-background grid place-items-center overflow-hidden">
                 {a.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -169,12 +176,35 @@ export default function MarketplacePage() {
                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="body-space-mono text-[#858584]">Price</div>
-                    <div className="body-space-mono">—</div>
+                    <div className="body-space-mono">{a.priceEth} AVAX</div>
                   </div>
                   <div className="text-right">
                     <div className="body-space-mono text-[#858584]">Category</div>
                     <div className="body-space-mono">—</div>
                   </div>
+                </div>
+                <div className="mt-4">
+                  <button
+                    disabled={buyingId === a.listingId}
+                    onClick={async () => {
+                      try {
+                        setBuyingId(a.listingId);
+                        const tx = await buyListing(a.listingId, a.priceWei);
+                        await tx.wait();
+                        // Refresh listings
+                        const items = await fetchAvailableListings();
+                        setListings(items);
+                      } catch (e) {
+                        console.error(e);
+                        alert("Purchase failed");
+                      } finally {
+                        setBuyingId(null);
+                      }
+                    }}
+                    className="h-10 px-4 rounded-[14px] bg-cta"
+                  >
+                    {buyingId === a.listingId ? "Buying…" : "Buy"}
+                  </button>
                 </div>
               </div>
             </div>
