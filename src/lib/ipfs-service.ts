@@ -1,5 +1,6 @@
 // IPFS metadata service for AI Agents
 import { NFTMetadata, AgentMetadata } from '@/lib/types';
+import axios from 'axios';
 
 export class IPFSService {
   // For demo purposes, we'll use a simple approach
@@ -38,23 +39,25 @@ export class IPFSService {
   }
 
   static async uploadToIPFS(metadata: NFTMetadata): Promise<string> {
-    // For demo, we'll simulate IPFS upload by storing locally
-    // In production, use something like:
-    // - NFT.Storage
-    // - Pinata
-    // - Helia (modern IPFS)
-    
-    const simulatedHash = `Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log('Simulated IPFS upload:', {
-      hash: simulatedHash,
-      metadata
-    });
-    
-    return simulatedHash;
+    // Real Pinata upload with group
+    const url = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
+    try {
+      const res = await axios.post(url, {
+        pinataOptions: {
+          pinataApp: "Avalanche"
+        },
+        pinataContent: metadata
+      }, {
+        headers: {
+          'pinata_api_key': process.env.PINATA_API_KEY!,
+          'pinata_secret_api_key': process.env.PINATA_SECRET_API_KEY!,
+        },
+      });
+      return res.data.IpfsHash;
+    } catch (error: any) {
+      console.error('Pinata upload failed:', error?.response?.data || error);
+      throw new Error('Failed to upload metadata to Pinata');
+    }
   }
 
   static getIPFSUrl(hash: string): string {

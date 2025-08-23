@@ -12,15 +12,21 @@ export default function MarketplacePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchAgents();
+    fetchMintedAgents();
   }, []);
 
-  const fetchAgents = async () => {
+  // Fetch agents minted as NFTs from Pinata/IPFS
+  const fetchMintedAgents = async () => {
     try {
-      const response = await fetch('/api/agents');
+      const response = await fetch('/api/nft/agents');
       const data = await response.json();
       if (data.success) {
-        setAgents(data.agents);
+        // Hide systemPrompt attribute
+        const agentsNoPrompt = data.agents.map((agent: any) => {
+          const { systemPrompt, ...rest } = agent;
+          return rest;
+        });
+        setAgents(agentsNoPrompt);
       }
     } catch (error) {
       console.error('Error fetching agents:', error);

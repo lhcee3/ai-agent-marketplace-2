@@ -22,15 +22,11 @@ export const IPFS_CONFIG = {
 
 // Contract ABIs (simplified for frontend interaction)
 export const AI_AGENT_NFT_ABI = [
-  "function mint(address to, uint256 tokenId, string memory uri) public",
-  "function ownerOf(uint256 tokenId) public view returns (address)",
-  "function tokenURI(uint256 tokenId) public view returns (string)",
-  "function approve(address to, uint256 tokenId) public",
-  "function setApprovalForAll(address operator, bool approved) public",
-  "function balanceOf(address owner) public view returns (uint256)",
-  "function totalSupply() public view returns (uint256)",
-  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
-  "event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)"
+  "function mintAgent(string name, string image, string description, string systemPrompt, string tokenURI) returns (uint256)",
+  "function getAgentMetadata(uint256 tokenId) view returns (tuple(string name, string image, string description, string systemPrompt))",
+  "function exists(uint256 tokenId) view returns (bool)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function tokenURI(uint256 tokenId) view returns (string)"
 ];
 
 export const AI_AGENT_MARKETPLACE_ABI = [

@@ -4,27 +4,31 @@ import { IPFSService } from '@/lib/ipfs-service';
 
 export async function POST(request: Request) {
   try {
-    const { agentId, userAddress } = await request.json();
-    
-    if (!agentId || !userAddress) {
+    const { name, image, description, systemPrompt, walletAddress } = await request.json();
+    if (!name || !image || !description || !walletAddress) {
       return NextResponse.json(
-        { success: false, error: 'Agent ID and user address are required' },
+        { success: false, error: 'Name, image, description, and wallet address are required' },
         { status: 400 }
       );
     }
 
-    // Get agent details
-    const agent = AgentService.getAgentById(agentId);
-    if (!agent) {
-      return NextResponse.json(
-        { success: false, error: 'Agent not found' },
-        { status: 404 }
-      );
-    }
+    // Prepare agent metadata (exclude systemPrompt from IPFS metadata)
+    const agentData = {
+      id: `${Date.now()}`,
+      name,
+      image,
+      description,
+      creator: walletAddress,
+      category: 'Custom',
+      capabilities: [],
+      price: 0,
+      endpoint: '',
+      created_at: new Date().toISOString(),
+      systemPrompt,
+    };
 
-    // Mint NFT with IPFS metadata
-    const mintResult = await IPFSService.mintAgentNFT(agent);
-    
+    // Upload metadata to IPFS/Pinata
+    const mintResult = await IPFSService.mintAgentNFT(agentData);
     if (!mintResult.success) {
       return NextResponse.json(
         { success: false, error: mintResult.error },
@@ -32,30 +36,31 @@ export async function POST(request: Request) {
       );
     }
 
-    // In a real implementation, you would:
-    // 1. Call the smart contract to mint the NFT
-    // 2. Store the transaction hash and token ID
-    // 3. Update the agent's ownership status
-    
-    // For demo purposes, we'll simulate a successful mint
+    // Simulate storing agent with ipfsHash
+    const agentWithIpfs = {
+      ...agentData,
+      id: `${Date.now()}`,
+      ipfsHash: mintResult.ipfsHash,
+    };
+    AgentService.createAgent(agentWithIpfs);
+
+    // Simulate minting NFT (replace with contract call in production)
     const mockTransactionHash = `0x${Math.random().toString(16).substring(2, 66)}`;
     const mockTokenId = Math.floor(Math.random() * 10000);
 
     return NextResponse.json({
       success: true,
-      message: 'Agent NFT minted successfully',
-      transactionHash: mockTransactionHash,
+      tx: mockTransactionHash,
       tokenId: mockTokenId,
       tokenURI: mintResult.tokenURI,
-      ipfsHash: mintResult.ipfsHash,
+      ipfsUrl: mintResult.tokenURI,
       agent: {
-        id: agent.id,
-        name: agent.name,
-        price: agent.price
+        id: agentWithIpfs.id,
+        name: agentWithIpfs.name,
+        price: agentWithIpfs.price,
       },
-      owner: userAddress
+      owner: walletAddress,
     });
-
   } catch (error) {
     console.error('Error minting NFT:', error);
     return NextResponse.json(

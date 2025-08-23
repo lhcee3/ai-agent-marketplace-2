@@ -2,41 +2,43 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract AIAgentNFT is ERC721URIStorage, Ownable {
+contract AIAgentNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
     struct AgentMetadata {
         string name;
-        string version;
+        string image;
         string description;
+        string systemPrompt;
     }
 
     mapping(uint256 => AgentMetadata) public agentMetadata;
 
-    constructor() ERC721("AIAgent", "AIA") Ownable(msg.sender) {}
+    constructor() ERC721("AIAgent", "AIA") {}
 
     function mintAgent(
-        address to,
         string memory name,
-        string memory version,
-        string memory description
-    ) public onlyOwner returns (uint256) {
+        string memory image,
+        string memory description,
+        string memory systemPrompt,
+        string memory tokenURI
+    ) public returns (uint256) {
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
-        _safeMint(to, newTokenId);
+        _safeMint(msg.sender, newTokenId);
+        _setTokenURI(newTokenId, tokenURI);
 
-        agentMetadata[newTokenId] = AgentMetadata(name, version, description);
+        agentMetadata[newTokenId] = AgentMetadata(name, image, description, systemPrompt);
 
         return newTokenId;
     }
 
     function getAgentMetadata(uint256 tokenId) public view returns (AgentMetadata memory) {
-        require(ownerOf(tokenId) != address(0), "Agent does not exist");
+        require(_exists(tokenId), "Agent does not exist");
         return agentMetadata[tokenId];
     }
 }
