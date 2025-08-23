@@ -1,6 +1,54 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+
+function ProfileDropdown({ address, onLogout }: { address: string; onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-[var(--background-secondary)] hover:bg-gray-200 focus:outline-none"
+        aria-label="Profile"
+      >
+        {/* Simple profile icon (SVG) */}
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" fill="#888" />
+          <rect x="6" y="16" width="12" height="4" rx="2" fill="#888" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+          <a
+            href={`/artist/${address}`}
+            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+            onClick={() => setOpen(false)}
+          >
+            My Profile
+          </a>
+          <button
+            onClick={() => { setOpen(false); onLogout(); }}
+            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -39,6 +87,7 @@ export default function ConnectWallet() {
   const [address, setAddress] = useState<string | null>(null);
   const [authAddress, setAuthAddress] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   // Detect existing connection and auth
   useEffect(() => {
@@ -56,11 +105,11 @@ export default function ConnectWallet() {
         const data = await res.json();
         if (mounted && data?.authenticated && data.address) setAuthAddress(data.address);
       } catch {}
+      setInitializing(false);
     })();
     const handler = (accs: unknown) => {
       const a = Array.isArray(accs) ? (accs as string[]) : [];
       setAddress(a?.[0] ?? null);
-      // If wallet account changes, require re-auth
       setAuthAddress(null);
     };
     if (window.ethereum?.on) {
@@ -84,6 +133,7 @@ export default function ConnectWallet() {
     if (!provider) {
       alert("No wallet detected. Please install Core Wallet (https://core.app/) or MetaMask.");
       return;
+      const [initializing, setInitializing] = useState(true);
     }
 
     try {
@@ -172,68 +222,27 @@ export default function ConnectWallet() {
 
   return (
     <div className="flex items-center gap-2 relative">
-      <button
-        disabled={loading}
-        onClick={onClick}
-        className="ml-2 inline-flex items-center h-10 px-4 rounded-[20px] bg-cta disabled:opacity-60"
-      >
-        {loading ? "Please wait…" : statusLabel}
-      </button>
-      {isAuthenticated && (
-        <ProfileDropdown address={authAddress ?? address ?? ""} onLogout={logout} />
-      )}
-    </div>
-  );
-}
-
-// ProfileDropdown component
-import React, { useRef } from "react";
-
-function ProfileDropdown({ address, onLogout }: { address: string; onLogout: () => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-[var(--background-secondary)] hover:bg-gray-200 focus:outline-none"
-        aria-label="Profile"
-      >
-        {/* Simple profile icon (SVG) */}
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4" fill="#888" />
-          <rect x="6" y="16" width="12" height="4" rx="2" fill="#888" />
-        </svg>
-      </button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
-          <a
-            href={`/artist/${address}`}
-            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
-            onClick={() => setOpen(false)}
-          >
-            My Profile
-          </a>
-          <button
-            onClick={() => { setOpen(false); onLogout(); }}
-            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-          >
-            Logout
-          </button>
+      {initializing ? (
+        <div className="ml-2 h-10 flex items-center">
+          <svg className="animate-spin h-6 w-6 text-gray-400" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+          <span className="ml-2 text-gray-400">Loading...</span>
         </div>
+      ) : (
+        <>
+          <button
+            disabled={loading}
+            onClick={onClick}
+            className="ml-2 inline-flex items-center h-10 px-4 rounded-[20px] bg-cta disabled:opacity-60"
+          >
+            {loading ? "Please wait…" : statusLabel}
+          </button>
+          {isAuthenticated && (
+            <ProfileDropdown address={authAddress ?? address ?? ""} onLogout={logout} />
+          )}
+        </>
       )}
     </div>
   );
