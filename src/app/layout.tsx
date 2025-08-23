@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ConnectWallet from "../components/ConnectWallet";
 import Link from "next/link";
-import ClientHeader from "../components/ClientHeader";
+
 
 export const metadata: Metadata = {
   title: "AI Agent Marketplace",
