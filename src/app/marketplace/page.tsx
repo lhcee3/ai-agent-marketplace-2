@@ -1,171 +1,207 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { AgentMetadata } from '@/lib/types';
-import AgentModal from '@/components/AgentModal';
-import Image from 'next/image';
+import { useEffect, useMemo, useState } from "react";
+import { fetchRecentMintedAgents, type MintedAgent } from "@/lib/aiAgentNft";
+
+const CATEGORIES = [
+  "Customer Support",
+  "Sales & Outreach",
+  "Research & Summarization",
+  "Code Assistant",
+  "Data Analysis",
+  "Marketing & Social",
+  "DevOps & Infra",
+  "Finance & Ops",
+] as const;
+
+type UiAgent = {
+  id: string;
+  name: string;
+  image?: string;
+  owner: string;
+  category?: string;
+  priceEth?: number;
+};
 
 export default function MarketplacePage() {
-  const [agents, setAgents] = useState<AgentMetadata[]>([]);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<string | "all">("all");
+  const [sort, setSort] = useState<"popular" | "new" | "priceAsc" | "priceDesc">("popular");
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState<AgentMetadata | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [minted, setMinted] = useState<MintedAgent[]>([]);
 
   useEffect(() => {
-    fetchMintedAgents();
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const items = await fetchRecentMintedAgents(100);
+        if (mounted) setMinted(items);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Fetch agents minted as NFTs from Pinata/IPFS
-  const fetchMintedAgents = async () => {
-    try {
-      setError(null);
-      const response = await fetch('/api/nft/agents');
-      const data = await response.json();
-      if (data.success) {
-        // Hide systemPrompt attribute and filter for successful mints
-        const agentsNoPrompt = data.agents
-          .filter((agent: any) => agent.ipfsHash && agent.txHash)
-          .map((agent: any) => {
-            const { systemPrompt, ...rest } = agent;
-            return rest;
-          });
-        setAgents(agentsNoPrompt);
-      } else {
-        setError('Failed to fetch agents. Please try again later.');
-      }
-    } catch (err: any) {
-      setError('Error fetching agents. Please check your connection and try again.');
-      console.error('Error fetching agents:', err);
-    } finally {
-      setLoading(false);
+  const data = useMemo(() => {
+    let d: UiAgent[] = minted.map((m) => ({
+      id: m.tokenId,
+      name: m.metadata?.name || `Agent #${m.tokenId}`,
+      image: m.metadata?.image,
+      owner: m.owner,
+    }));
+    if (category !== "all") d = d.filter((a) => a.category === category);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      d = d.filter((a) => a.name.toLowerCase().includes(q) || a.owner.toLowerCase().includes(q));
     }
-  };
-
-  const handleInteract = (agent: AgentMetadata) => {
-    setSelectedAgent(agent);
-    setIsModalOpen(true);
-  };
-
-  const handlePurchase = async (agent: AgentMetadata) => {
-    // Simulate transaction error for demo
-    const transactionError = false; // Set to true to simulate error
-    if (transactionError) {
-      setError('Transaction underpriced. Please retry or increase your gas price.');
-      return;
+    switch (sort) {
+      case "priceAsc":
+        d.sort((a, b) => (a.priceEth ?? Infinity) - (b.priceEth ?? Infinity));
+        break;
+      case "priceDesc":
+        d.sort((a, b) => (b.priceEth ?? -Infinity) - (a.priceEth ?? -Infinity));
+        break;
+      case "new":
+        d = d.reverse();
+        break;
+      default:
+        break;
     }
-    alert(`Purchasing ${agent.name} for ${agent.price} ETH. Integration with smart contract coming soon!`);
-  };
+    return d;
+  }, [category, query, sort, minted]);
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading AI agents...</p>
-        </div>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 text-lg mb-4">{error}</p>
-          {error.includes('underpriced') && (
-            <button
-              className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded"
-              onClick={() => {
-                setError(null);
-                fetchMintedAgents();
-              }}
-            >
-              Retry
-            </button>
-          )}
-        </div>
-      </main>
-    );
-  }
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="px-6 md:px-10 lg:px-16 xl:px-24 py-10 md:py-12">
-        <div className="flex flex-col gap-2 mb-8">
-          <h1 className="text-4xl font-bold">AI Agent Marketplace</h1>
-          <p className="text-gray-400">Browse and purchase AI Agents as NFTs</p>
+        <div className="flex flex-col gap-2 mb-6">
+          <h1 className="h3-work-sans text-[38px]">Marketplace</h1>
+          <p className="body-work-sans text-[#858584]">Browse and discover AI Agents from top builders.</p>
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-center justify-between mb-6">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+            <input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search agents or builders"
+              className="h-12 rounded-[20px] px-4 bg-[var(--background-secondary)] text-white placeholder:text-[#858584] outline-none border border-white/10"
+            />
+            <select
+              value={sort}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSort(e.target.value as typeof sort)}
+              className="h-12 rounded-[20px] px-4 bg-[var(--background-secondary)] text-white outline-none border border-white/10"
+            >
+              <option value="popular">Most Popular</option>
+              <option value="new">Newest</option>
+              <option value="priceAsc">Price: Low to High</option>
+              <option value="priceDesc">Price: High to Low</option>
+            </select>
+          </div>
+          <div className="overflow-x-auto no-scrollbar lg:overflow-visible">
+            <div className="flex gap-2 lg:flex-wrap">
+              <button
+                onClick={() => {
+                  setCategory("all");
+                  setPage(1);
+                }}
+                className={`px-3 h-10 rounded-[14px] whitespace-nowrap ${
+                  category === "all" ? "bg-cta" : "bg-[var(--background-secondary)]"
+                }`}
+              >
+                All
+              </button>
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => {
+                    setCategory(c);
+                    setPage(1);
+                  }}
+                  className={`px-3 h-10 rounded-[14px] whitespace-nowrap ${
+                    category === c ? "bg-cta" : "bg-[var(--background-secondary)]"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Results summary */}
+        <div className="body-space-mono text-sm text-[#858584] mb-4">
+          {loading ? "Loading…" : `${total} results${category !== "all" ? ` in ${category}` : ""}`}
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {agents.map((agent) => (
-            <div key={agent.id} className="rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
-              <div className="relative aspect-square bg-gradient-to-br from-blue-400/20 to-purple-500/20">
-                <Image
-                  src={agent.image}
-                  alt={agent.name}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {pageData.map((a) => (
+            <div key={a.id} className="rounded-[20px] overflow-hidden bg-[var(--background-secondary)]">
+              <div className="relative aspect-square bg-background grid place-items-center overflow-hidden">
+                {a.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={a.image} alt={a.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-[#858584]">{a.name}</div>
+                )}
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{agent.name}</h3>
-                <p className="text-gray-400 text-sm mb-4 line-clamp-2">{agent.description}</p>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                  <div className="text-gray-400 text-sm">
-                    {agent.creator.slice(0, 6)}...{agent.creator.slice(-4)}
-                  </div>
+                <div className="h5-work-sans text-[22px]">{a.name}</div>
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="size-6 rounded-full bg-neutral-500" />
+                  <div className="body-work-sans text-[#858584]">{a.owner.slice(0, 6)}…{a.owner.slice(-4)}</div>
                 </div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-gray-400 text-sm">Price</div>
-                    <div className="font-mono">{agent.price.toFixed(3)} ETH</div>
+                    <div className="body-space-mono text-[#858584]">Price</div>
+                    <div className="body-space-mono">—</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-gray-400 text-sm">Category</div>
-                    <div className="text-sm">{agent.category}</div>
+                    <div className="body-space-mono text-[#858584]">Category</div>
+                    <div className="body-space-mono">—</div>
                   </div>
-                </div>
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleInteract(agent)}
-                    className="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-2 px-3 rounded text-sm font-medium transition-colors"
-                  >
-                    Try Demo
-                  </button>
-                  <button
-                    onClick={() => handlePurchase(agent)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 px-3 rounded text-sm font-medium transition-colors"
-                  >
-                    Buy NFT
-                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {agents.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No successfully minted agents available yet.</p>
-            <p className="text-gray-500 mt-2">Agents will appear here after successful minting. If you recently minted, please refresh or check your transaction status.</p>
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-8">
+          <button
+            className="h-10 px-4 rounded-[14px] bg-[var(--background-secondary)] disabled:opacity-50"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          <div className="body-space-mono text-sm text-[#858584]">
+            Page {page} of {totalPages}
           </div>
-        )}
+          <button
+            className="h-10 px-4 rounded-[14px] bg-[var(--background-secondary)] disabled:opacity-50"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next
+          </button>
+        </div>
       </section>
-
-      {/* Agent Modal */}
-      <AgentModal
-        agent={selectedAgent}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedAgent(null);
-        }}
-      />
     </main>
   );
 }

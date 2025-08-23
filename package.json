@@ -9,32 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@avalabs/avalanchejs": "^5.0.0",
-    "@helia/json": "^4.0.7",
-    "@helia/unixfs": "^5.1.0",
-    "@huggingface/inference": "^4.7.1",
-    "@openzeppelin/contracts": "^5.4.0",
-    "@types/uuid": "^10.0.0",
-    "axios": "^1.11.0",
     "ethers": "^6.15.0",
-    "express": "^5.1.0",
     "hardhat": "^3.0.1",
-    "helia": "^5.5.1",
-    "ipfs-http-client": "^60.0.1",
-    "mongoose": "^8.18.0",
     "next": "15.5.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "uuid": "^11.1.0"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@sinonjs/fake-timers": "^14.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/sinon": "^17.0.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.0",
     "tailwindcss": "^4",

@@ -38,7 +38,20 @@ contract AIAgentNFT is ERC721URIStorage {
     }
 
     function getAgentMetadata(uint256 tokenId) public view returns (AgentMetadata memory) {
-        require(_exists(tokenId), "Agent does not exist");
+        require(_isValidToken(tokenId), "Agent does not exist");
         return agentMetadata[tokenId];
+    }
+
+    function _isValidToken(uint256 tokenId) internal view returns (bool) {
+        try this.ownerOf(tokenId) returns (address) {
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    
+    function exists(uint256 tokenId) public view returns (bool) {
+        return _isValidToken(tokenId);
     }
 }
