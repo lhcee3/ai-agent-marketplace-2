@@ -116,12 +116,24 @@ export default function ChatPage() {
         <div className="max-w-3xl mx-auto rounded-[20px] bg-[var(--background-secondary)] p-6">
           <div className="h5-work-sans text-[20px] mb-4">Chat with {agentName || `Agent #${tokenId}`}</div>
           <div className="h-[50vh] overflow-y-auto rounded-[12px] bg-background p-4 space-y-3">
-            {messages.map((m, i) => (
-              <div key={i} className={`p-3 rounded-[12px] ${m.role === "user" ? "bg-cta/30" : "bg-white/5"}`}>
-                <div className="body-space-mono text-xs text-[#858584] mb-1">{m.role}</div>
-                <div className="whitespace-pre-wrap">{m.content}</div>
-              </div>
-            ))}
+            {messages.map((m, i) => {
+              // Format message content: bullet points and bold
+              let formatted = m.content
+                // Bullet points: lines starting with *
+                .replace(/^\*\s+(.*)$/gm, '<li>$1</li>')
+                // Bold: text between ** and **
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+              // If any <li> tags, wrap in <ul>
+              if (/<li>/.test(formatted)) {
+                formatted = `<ul style='list-style-type:disc;padding-left:1.5em;'>${formatted}</ul>`;
+              }
+              return (
+                <div key={i} className={`p-3 rounded-[12px] ${m.role === "user" ? "bg-cta/30" : "bg-white/5"}`}>
+                  <div className="body-space-mono text-xs text-[#858584] mb-1">{m.role}</div>
+                  <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: formatted }} />
+                </div>
+              );
+            })}
             <div ref={endRef} />
           </div>
           <div className="mt-4 grid grid-cols-[1fr_auto] gap-3">
