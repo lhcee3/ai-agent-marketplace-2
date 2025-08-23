@@ -133,7 +133,6 @@ export default function ConnectWallet() {
     if (!provider) {
       alert("No wallet detected. Please install Core Wallet (https://core.app/) or MetaMask.");
       return;
-      const [initializing, setInitializing] = useState(true);
     }
 
     try {
