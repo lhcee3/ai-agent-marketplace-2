@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       headers: PINATA_JWT
         ? { Authorization: `Bearer ${PINATA_JWT}` }
         : { pinata_api_key: PINATA_API_KEY!, pinata_secret_api_key: PINATA_SECRET_API_KEY! },
-      body: pinataForm as any,
+      body: pinataForm,
     });
 
     if (!resp.ok) {
