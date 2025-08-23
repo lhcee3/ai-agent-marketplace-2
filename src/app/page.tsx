@@ -4,6 +4,8 @@
 import Link from "next/link";
 import ConnectWallet from "../components/ConnectWallet";
 
+import { useEffect, useState } from "react";
+
 export default function Home() {
   // Static particles to avoid hydration mismatch
   const floatingParticles = Array.from({ length: 50 }).map((_, i) => ({
@@ -13,6 +15,12 @@ export default function Home() {
     delay: (i * 0.1) % 3,
     duration: 2 + (i % 3)
   }));
+
+  // Fix hydration error for neural nodes
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <main className="min-h-screen bg-background text-foreground font-sans pt-24">
@@ -371,7 +379,8 @@ export default function Home() {
           
           {/* Floating Neural Nodes */}
           <div className="absolute inset-0">
-            {Array.from({ length: 12 }).map((_, i) => (
+            {/* Fix hydration error: generate node positions on client only */}
+            {isClient && Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={`node-${i}`}
                 className="absolute w-2 h-2 bg-blue-400/60 rounded-full"
