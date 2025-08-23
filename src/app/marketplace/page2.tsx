@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { AgentMetadata } from '@/lib/types';
-import AgentModal from '@/components/AgentModal';
+import { AgentMetadata } from '../../lib/types';
+// Update the import path if AgentModal is in src/components/AgentModal.tsx
+import AgentModal from '../../components/AgentModal';
 import Image from 'next/image';
 
 const CATEGORIES = [
