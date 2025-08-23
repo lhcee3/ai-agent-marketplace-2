@@ -217,29 +217,76 @@ export default function CreateAgentPage() {
 
                 <div>
                   <label className="block body-space-mono text-sm text-[#c9c9c9] mb-2">Agent Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="h-12 w-full rounded-[16px] px-4 bg-background text-white outline-none border border-white/10"
-                    onChange={onImageChange}
-                  />
-                  <button
-                    type="button"
-                    className="mt-2 h-10 px-4 rounded-[16px] bg-cta text-white inline-flex items-center justify-center disabled:opacity-60"
-                    onClick={handleImageUpload}
-                    disabled={!imageFile || uploading}
+                  <div
+                    className={`relative w-full rounded-[16px] border-2 border-dashed border-[#858584] bg-background flex flex-col items-center justify-center py-8 cursor-pointer transition hover:border-cta ${imageFile ? 'border-cta' : ''}`}
+                    onClick={() => !uploading && document.getElementById('agent-image-input')?.click()}
+                    onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (uploading) return;
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && file.type.startsWith('image/')) {
+                        setImageFile(file);
+                      }
+                    }}
                   >
-                    {uploading ? "Uploading..." : "Upload Image to IPFS"}
-                  </button>
-                  {uploadProgress !== null && (
-                    <div className="mt-2 w-full bg-[#222] rounded-full h-3 overflow-hidden">
-                      <div
-                        className="bg-cta h-3 rounded-full transition-all"
-                        style={{ width: `${uploadProgress}%` }}
-                      ></div>
-                    </div>
-                  )}
-                  <p className="mt-2 text-xs text-[#858584]">Upload an image (PNG, JPG, SVG). It will be pinned to IPFS.</p>
+                    <input
+                      id="agent-image-input"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={onImageChange}
+                      disabled={uploading}
+                    />
+                    {!imageFile ? (
+                      <>
+                        <div className="flex flex-col items-center gap-2">
+                          <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><path stroke="#858584" strokeWidth="2" d="M12 16v-8m0 0-3 3m3-3 3 3"/><rect width="20" height="20" x="2" y="2" stroke="#858584" strokeWidth="2" rx="6"/></svg>
+                          <span className="text-[#858584] text-sm">Drag & drop or click to select image</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="aspect-square w-32 rounded-[12px] bg-background border border-white/10 overflow-hidden">
+                          <img
+                            src={URL.createObjectURL(imageFile)}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          className="text-xs text-red-400 underline"
+                          onClick={e => { e.stopPropagation(); setImageFile(null); }}
+                          disabled={uploading}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      type="button"
+                      className="h-10 px-6 rounded-[16px] bg-cta text-white font-semibold inline-flex items-center justify-center disabled:opacity-60 shadow-md"
+                      onClick={handleImageUpload}
+                      disabled={!imageFile || uploading}
+                    >
+                      {uploading ? (
+                        <span className="flex items-center gap-2"><span className="animate-spin">⏳</span> Uploading...</span>
+                      ) : "Upload Image to IPFS"}
+                    </button>
+                    {uploadProgress !== null && (
+                      <div className="w-32 bg-[#222] rounded-full h-3 overflow-hidden">
+                        <div
+                          className="bg-cta h-3 rounded-full transition-all"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-[#858584]">PNG, JPG, SVG. Max 5MB. Your image will be pinned to IPFS.</p>
                   {image && (
                     <p className="mt-2 text-xs text-[#858584]">IPFS URI: {image}</p>
                   )}
