@@ -66,8 +66,8 @@ export default function Home() {
 
       {/* Futuristic Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-blue-950 to-black">
+        {/* Extended Animated Background - covers full viewport and beyond */}
+        <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-black via-blue-950 to-black" style={{ top: '-100px', left: '-100px', width: 'calc(100vw + 200px)', height: 'calc(100vh + 200px)' }}>
           {/* Floating Particles */}
           <div className="absolute inset-0">
             {floatingParticles.map((particle) => (
