@@ -27,7 +27,18 @@ export function useMintAgentNFT() {
       const signer = await new BrowserProvider(provider).getSigner();
       const address = contractAddress || SMART_CONTRACTS.AI_AGENT_NFT;
       const contract = new Contract(address, AI_AGENT_NFT_ABI, signer);
-      const tx = await contract.mintAgent(name, image, description, systemPrompt, tokenURI, { gasLimit: 500000 });
+      const tx = await contract.mintAgent(
+        name,
+        image,
+        description,
+        systemPrompt,
+        tokenURI,
+        {
+          gasLimit: 500000,
+          maxFeePerGas: 50_000_000_000, // 50 Gwei
+          maxPriorityFeePerGas: 5_000_000_000 // 5 Gwei
+        }
+      );
       await tx.wait();
       setTxHash(tx.hash);
       return { txHash: tx.hash };
@@ -56,7 +67,16 @@ export async function mintAgentNFTWithUserWallet({ walletAddress, tokenURI, prov
   const address = contractAddress || SMART_CONTRACTS.AI_AGENT_NFT;
   const contract = new Contract(address, AI_AGENT_NFT_ABI, signer);
   const tokenId = toBigInt(Date.now()).toString();
-  const tx = await contract.mint(walletAddress, tokenId, tokenURI);
+  const tx = await contract.mint(
+    walletAddress,
+    tokenId,
+    tokenURI,
+    {
+      gasLimit: 500000,
+  maxFeePerGas: 50_000_000_000, // 50 Gwei
+  maxPriorityFeePerGas: 5_000_000_000 // 5 Gwei
+    }
+  );
   await tx.wait();
   return { txHash: tx.hash, tokenId };
 }

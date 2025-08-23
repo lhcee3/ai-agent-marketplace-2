@@ -8,6 +8,7 @@ import Image from 'next/image';
 export default function MarketplacePage() {
   const [agents, setAgents] = useState<AgentMetadata[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<AgentMetadata | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -18,18 +19,24 @@ export default function MarketplacePage() {
   // Fetch agents minted as NFTs from Pinata/IPFS
   const fetchMintedAgents = async () => {
     try {
+      setError(null);
       const response = await fetch('/api/nft/agents');
       const data = await response.json();
       if (data.success) {
-        // Hide systemPrompt attribute
-        const agentsNoPrompt = data.agents.map((agent: any) => {
-          const { systemPrompt, ...rest } = agent;
-          return rest;
-        });
+        // Hide systemPrompt attribute and filter for successful mints
+        const agentsNoPrompt = data.agents
+          .filter((agent: any) => agent.ipfsHash && agent.txHash)
+          .map((agent: any) => {
+            const { systemPrompt, ...rest } = agent;
+            return rest;
+          });
         setAgents(agentsNoPrompt);
+      } else {
+        setError('Failed to fetch agents. Please try again later.');
       }
-    } catch (error) {
-      console.error('Error fetching agents:', error);
+    } catch (err: any) {
+      setError('Error fetching agents. Please check your connection and try again.');
+      console.error('Error fetching agents:', err);
     } finally {
       setLoading(false);
     }
@@ -41,6 +48,12 @@ export default function MarketplacePage() {
   };
 
   const handlePurchase = async (agent: AgentMetadata) => {
+    // Simulate transaction error for demo
+    const transactionError = false; // Set to true to simulate error
+    if (transactionError) {
+      setError('Transaction underpriced. Please retry or increase your gas price.');
+      return;
+    }
     alert(`Purchasing ${agent.name} for ${agent.price} ETH. Integration with smart contract coming soon!`);
   };
 
@@ -50,6 +63,27 @@ export default function MarketplacePage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading AI agents...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg mb-4">{error}</p>
+          {error.includes('underpriced') && (
+            <button
+              className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded"
+              onClick={() => {
+                setError(null);
+                fetchMintedAgents();
+              }}
+            >
+              Retry
+            </button>
+          )}
         </div>
       </main>
     );
@@ -79,14 +113,12 @@ export default function MarketplacePage() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2">{agent.name}</h3>
                 <p className="text-gray-400 text-sm mb-4 line-clamp-2">{agent.description}</p>
-                
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
                   <div className="text-gray-400 text-sm">
                     {agent.creator.slice(0, 6)}...{agent.creator.slice(-4)}
                   </div>
                 </div>
-                
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="text-gray-400 text-sm">Price</div>
@@ -97,7 +129,6 @@ export default function MarketplacePage() {
                     <div className="text-sm">{agent.category}</div>
                   </div>
                 </div>
-
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   <button
@@ -120,7 +151,8 @@ export default function MarketplacePage() {
 
         {agents.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No agents available.</p>
+            <p className="text-gray-400 text-lg">No successfully minted agents available yet.</p>
+            <p className="text-gray-500 mt-2">Agents will appear here after successful minting. If you recently minted, please refresh or check your transaction status.</p>
           </div>
         )}
       </section>
