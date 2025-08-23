@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { AVALANCHE_CONFIG } from "../config/contracts";
 
 function ProfileDropdown({ address, onLogout }: { address: string; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
@@ -66,17 +67,17 @@ declare global {
 }
 
 // Avalanche C-Chain configuration
-const AVALANCHE_CHAIN_ID = '0xa86a'; // 43114 in hex
+const AVALANCHE_CHAIN_ID = AVALANCHE_CONFIG.CHAIN_HEX;
 const AVALANCHE_NETWORK = {
-  chainId: AVALANCHE_CHAIN_ID,
-  chainName: 'Avalanche Network',
+  chainId: AVALANCHE_CONFIG.CHAIN_HEX,
+  chainName: AVALANCHE_CONFIG.NETWORK_NAME,
   nativeCurrency: {
-    name: 'AVAX',
-    symbol: 'AVAX',
-    decimals: 18,
+    name: AVALANCHE_CONFIG.CURRENCY_SYMBOL,
+    symbol: AVALANCHE_CONFIG.CURRENCY_SYMBOL,
+    decimals: AVALANCHE_CONFIG.CURRENCY_DECIMALS,
   },
-  rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
-  blockExplorerUrls: ['https://snowtrace.io/'],
+  rpcUrls: [AVALANCHE_CONFIG.RPC_URL],
+  blockExplorerUrls: [AVALANCHE_CONFIG.EXPLORER_URL],
 };
 
 function short(addr?: string) {
@@ -175,7 +176,7 @@ export default function ConnectWallet() {
       const nr = await fetch("/api/auth/nonce", { method: "POST" });
       const { nonce } = await nr.json();
       const ts = new Date().toISOString();
-      const message = `AI Agent Marketplace wants you to sign in\n\nAddress: ${address}\nNonce: ${nonce}\nTimestamp: ${ts}`;
+      const message = `SYNAPTICA wants you to sign in\n\nAddress: ${address}\nNonce: ${nonce}\nTimestamp: ${ts}`;
       const hexMessage = '0x' + Buffer.from(message, 'utf8').toString('hex');
       const signature = (await window.ethereum.request({
         method: "personal_sign",

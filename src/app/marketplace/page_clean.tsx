@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AgentMetadata } from '@/lib/types';
-import AgentModal from '@/components/AgentModal';
+// Update the import path if 'types.ts' is located elsewhere, for example:
+import { AgentMetadata } from '../../lib/types';
+// Or, if the file does not exist, create 'src/lib/types.ts' and define AgentMetadata there.
+import AgentModal from '../../components/AgentModal';
 import Image from 'next/image';
 
 export default function MarketplacePage() {
