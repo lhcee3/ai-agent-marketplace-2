@@ -25,8 +25,9 @@ export default function RootLayout({
             </Link>
             <nav className="hidden md:flex items-center gap-6 h5-work-sans text-[16px]">
               <Link className="hover:opacity-80" href="/marketplace">Marketplace</Link>
-              <Link className="hover:opacity-80" href="/#creators">Rankings</Link>
-              <Link className="hover:opacity-80" href="/#how">How it works</Link>
+              <Link className="hover:opacity-80" href="/playground">Playground</Link>
+              <Link className="hover:opacity-80" href="/avalanche">Avalanche</Link>
+              <Link className="hover:opacity-80" href="/docs">Docs</Link>
               <ConnectWallet />
             </nav>
             <button className="md:hidden inline-flex items-center justify-center size-10 rounded-[14px] bg-[var(--background-secondary)]">
