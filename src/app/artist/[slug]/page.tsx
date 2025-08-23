@@ -1,9 +1,10 @@
 import React from "react";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
-export default function ArtistPage({ params }: Props) {
-  const name = decodeURIComponent(params.slug).replace(/-/g, " ");
+export default async function ArtistPage({ params }: Props) {
+  const { slug } = await params;
+  const name = decodeURIComponent(slug).replace(/-/g, " ");
 
   return (
     <main className="bg-background text-foreground">
