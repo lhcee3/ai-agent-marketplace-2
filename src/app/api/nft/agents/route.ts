@@ -1,18 +1,23 @@
+// POST /api/nft/agents
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    // You can validate body fields here if needed
+    const nft = new NFT(body);
+    await nft.save();
+    return NextResponse.json({ success: true, nft });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Failed to save NFT' }, { status: 500 });
+  }
+}
 import { NextResponse } from 'next/server';
-import { IPFSService } from '@/lib/ipfs-service';
-import { AgentService } from '@/lib/agent-service';
+import NFT from '@/models/NFT';
 
-// This route returns all agents minted as NFTs (with metadata from Pinata/IPFS)
+// This route returns all agents minted as NFTs from MongoDB
 export async function GET() {
   try {
-    // In a real implementation, you would fetch all agent metadata hashes from your contract or DB
-    // For demo, get all agents and simulate IPFS metadata fetch
-    const agents = AgentService.getAllAgents();
-    // Only include agents with ipfsHash (i.e., minted)
-    const mintedAgents = agents.filter(agent => agent.ipfsHash);
-    // Optionally, fetch metadata from IPFS for each agent
-    // For demo, just return agent data
-    return NextResponse.json({ success: true, agents: mintedAgents });
+    const agents = await NFT.find({});
+    return NextResponse.json({ success: true, agents });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch agents' }, { status: 500 });
   }
