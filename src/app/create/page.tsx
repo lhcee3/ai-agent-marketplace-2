@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { ensureFujiNetwork, requestAccounts } from "@/lib/eth";
 import { AI_AGENT_NFT_ADDRESS, getWriteContract } from "@/lib/aiAgentNft";
 import { AI_AGENT_MARKETPLACE_ADDRESS, getListingFeeWei, listAgentForSale } from "@/lib/aiAgentMarketplace";
@@ -10,6 +10,70 @@ export default function CreateAgentPage() {
   const [description, setDescription] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
   const [image, setImage] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  // Handle image file upload to Pinata
+  const handleImageUpload = async () => {
+    if (!imageFile) {
+      setError("No image file selected");
+      return;
+    }
+    setError(null);
+    setUploading(true);
+    setUploadProgress(0);
+    try {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+
+      // Use XMLHttpRequest for progress
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/pinata/upload");
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const { uri } = JSON.parse(xhr.responseText);
+              setImage(uri);
+              setUploadProgress(100);
+              setShowToast(true);
+              setTimeout(() => setShowToast(false), 2000);
+              resolve();
+            } catch {
+              setError("Image upload failed");
+              reject();
+            }
+          } else {
+            setError("Image upload failed");
+            reject();
+          }
+        };
+        xhr.onerror = () => {
+          setError("Image upload failed");
+          reject();
+        };
+        xhr.send(formData);
+      });
+    } catch (err) {
+      setError("Image upload failed");
+    } finally {
+      setUploading(false);
+      setTimeout(() => setUploadProgress(null), 1500);
+    }
+  };
+
+  const onImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+    }
+  };
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -101,6 +165,11 @@ export default function CreateAgentPage() {
             </p>
           </div>
 
+          {showToast && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
+              Image uploaded successfully!
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
             {/* Form */}
             <form onSubmit={onSubmit} className="rounded-[20px] bg-[var(--background-secondary)] p-6 md:p-8">
@@ -139,14 +208,33 @@ export default function CreateAgentPage() {
                 </div>
 
                 <div>
-                  <label className="block body-space-mono text-sm text-[#c9c9c9] mb-2">Image URL</label>
+                  <label className="block body-space-mono text-sm text-[#c9c9c9] mb-2">Agent Image</label>
                   <input
-                    className="h-12 w-full rounded-[16px] px-4 bg-background text-white placeholder:text-[#858584] outline-none border border-white/10"
-                    placeholder="https://..."
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
+                    type="file"
+                    accept="image/*"
+                    className="h-12 w-full rounded-[16px] px-4 bg-background text-white outline-none border border-white/10"
+                    onChange={onImageChange}
                   />
-                  <p className="mt-2 text-xs text-[#858584]">Paste a link to a hosted image (PNG, JPG, SVG).</p>
+                  <button
+                    type="button"
+                    className="mt-2 h-10 px-4 rounded-[16px] bg-cta text-white inline-flex items-center justify-center disabled:opacity-60"
+                    onClick={handleImageUpload}
+                    disabled={!imageFile || uploading}
+                  >
+                    {uploading ? "Uploading..." : "Upload Image to IPFS"}
+                  </button>
+                  {uploadProgress !== null && (
+                    <div className="mt-2 w-full bg-[#222] rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-cta h-3 rounded-full transition-all"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-[#858584]">Upload an image (PNG, JPG, SVG). It will be pinned to IPFS.</p>
+                  {image && (
+                    <p className="mt-2 text-xs text-[#858584]">IPFS URI: {image}</p>
+                  )}
                 </div>
 
                 {/* Optional list on marketplace */}
