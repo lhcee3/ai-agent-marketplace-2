@@ -15,19 +15,19 @@ export default function Home() {
               Launch and monetize AI agents and chatbots for support, sales, research, and more. browse top builders, live demos, and transparent pricing.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <a href="/marketplace" className="inline-flex items-center justify-center h-12 px-6 rounded-[20px] bg-cta text-white h5-work-sans text-[16px] md:text-[22px]">
-                Browse Marketplace
+              <a href="#explore" className="inline-flex items-center justify-center h-12 px-6 rounded-[20px] bg-cta text-white h5-work-sans text-[16px] md:text-[22px]">
+                Get Started
               </a>
-              <a href="/playground" className="inline-flex items-center justify-center h-12 px-6 rounded-[20px] bg-[var(--background-secondary)] text-white h5-work-sans text-[16px] md:text-[22px]">
-                Try Playground
+              <a href="#how" className="inline-flex items-center justify-center h-12 px-6 rounded-[20px] bg-[var(--background-secondary)] text-white h5-work-sans text-[16px] md:text-[22px]">
+                How it works
               </a>
             </div>
 
             <div className="grid grid-cols-3 gap-6 pt-4">
               {[
-                { v: "12+", l: "AI Agents" },
-                { v: "8+", l: "Categories" },
-                { v: "100%", l: "On-Chain" },
+                { v: "240k+", l: "Total Sale" },
+                { v: "100k+", l: "Auctions" },
+                { v: "240k+", l: "Artists" },
               ].map((s) => (
                 <div key={s.l}>
                   <div className="h4-space-mono text-[28px]">{s.v}</div>
@@ -238,10 +238,9 @@ export default function Home() {
           <div>
             <div className="h5-work-sans text-[22px] mb-4">Explore</div>
             <ul className="space-y-2 text-[#858584]">
-              <li><a href="/marketplace">Marketplace</a></li>
-              <li><a href="/playground">API Playground</a></li>
-              <li><a href="/avalanche">Avalanche Integration</a></li>
-              <li><a href="/docs">Documentation</a></li>
+              <li><a href="#">Marketplace</a></li>
+              <li><a href="#">Rankings</a></li>
+              <li><a href="#">Connect a wallet</a></li>
             </ul>
           </div>
           <div>
