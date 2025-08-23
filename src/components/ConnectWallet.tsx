@@ -123,8 +123,9 @@ export default function ConnectWallet() {
     if (!isAuthenticated) return signIn();
   }, [isConnected, isAuthenticated, connect, signIn]);
 
+
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 relative">
       <button
         disabled={loading}
         onClick={onClick}
@@ -133,12 +134,60 @@ export default function ConnectWallet() {
         {loading ? "Please wait…" : statusLabel}
       </button>
       {isAuthenticated && (
-        <button
-          onClick={logout}
-          className="hidden md:inline-flex items-center h-10 px-3 rounded-[14px] bg-[var(--background-secondary)]"
-        >
-          Logout
-        </button>
+        <ProfileDropdown address={authAddress ?? address ?? ""} onLogout={logout} />
+      )}
+    </div>
+  );
+}
+
+// ProfileDropdown component
+import React, { useRef } from "react";
+
+function ProfileDropdown({ address, onLogout }: { address: string; onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-[var(--background-secondary)] hover:bg-gray-200 focus:outline-none"
+        aria-label="Profile"
+      >
+        {/* Simple profile icon (SVG) */}
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" fill="#888" />
+          <rect x="6" y="16" width="12" height="4" rx="2" fill="#888" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+          <a
+            href={`/artist/${address}`}
+            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+            onClick={() => setOpen(false)}
+          >
+            My Profile
+          </a>
+          <button
+            onClick={() => { setOpen(false); onLogout(); }}
+            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+          >
+            Logout
+          </button>
+        </div>
       )}
     </div>
   );
