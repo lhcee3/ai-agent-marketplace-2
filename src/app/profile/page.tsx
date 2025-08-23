@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchMyPurchases, type ListingWithMetadata } from "@/lib/aiAgentMarketplace";
+import { fetchMyPurchases, getListingFeeWei, listAgentForSale, type ListingWithMetadata } from "@/lib/aiAgentMarketplace";
 import Link from "next/link";
+import { ensureFujiNetwork, requestAccounts } from "@/lib/eth";
+import { formatEther } from "ethers";
 
 type EthereumProvider = { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
 
@@ -20,6 +22,10 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<ListingWithMetadata[]>([]);
   const [searchedDeep, setSearchedDeep] = useState(false);
+  const [resellKey, setResellKey] = useState<string | null>(null);
+  const [resellPrice, setResellPrice] = useState<string>("");
+  const [resellLoading, setResellLoading] = useState(false);
+  const [listingFeeEth, setListingFeeEth] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -133,11 +139,75 @@ export default function ProfilePage() {
                     {a.metadata?.description && (
                       <p className="body-work-sans text-[#c9c9c9] mt-2 line-clamp-3">{a.metadata.description}</p>
                     )}
-                    <div className="mt-3">
+                    <div className="mt-3 flex gap-3 flex-wrap items-center">
                       <Link href={`/chat/${a.nftContract}/${a.tokenId}`} className="h-10 px-4 rounded-[14px] bg-cta inline-flex items-center">
                         Chat
                       </Link>
+                      <button
+                        className="h-10 px-4 rounded-[14px] bg-[var(--background-secondary)] border border-white/10"
+                        disabled={resellLoading}
+                        onClick={async () => {
+                          const key = `${a.nftContract}:${a.tokenId}`;
+                          setResellKey(key);
+                          setResellPrice("");
+                          try {
+                            const fee = await getListingFeeWei();
+                            setListingFeeEth(formatEther(fee));
+                          } catch {
+                            setListingFeeEth(null);
+                          }
+                        }}
+                      >
+                        Resell
+                      </button>
                     </div>
+
+                    {resellKey === `${a.nftContract}:${a.tokenId}` && (
+                      <div className="mt-3 p-3 rounded-[12px] border border-white/10">
+                        <div className="body-space-mono text-sm text-[#858584] mb-2">
+                          {listingFeeEth ? `Listing fee: ${listingFeeEth} AVAX` : `Listing fee applies`}
+                        </div>
+                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+                          <input
+                            className="h-10 rounded-[10px] px-3 bg-background text-white outline-none border border-white/10"
+                            placeholder="Price in AVAX"
+                            inputMode="decimal"
+                            value={resellPrice}
+                            onChange={(e) => setResellPrice(e.target.value)}
+                          />
+                          <button
+                            disabled={resellLoading || !resellPrice}
+                            onClick={async () => {
+                              try {
+                                setResellLoading(true);
+                                await ensureFujiNetwork();
+                                await requestAccounts();
+                                const tx = await listAgentForSale(a.nftContract, a.tokenId, resellPrice);
+                                await tx.wait();
+                                alert("Listed on marketplace");
+                                setResellKey(null);
+                                setResellPrice("");
+                              } catch (e) {
+                                console.error(e);
+                                alert("Failed to list");
+                              } finally {
+                                setResellLoading(false);
+                              }
+                            }}
+                            className="h-10 px-4 rounded-[10px] bg-cta disabled:opacity-60"
+                          >
+                            {resellLoading ? "Listing…" : "Confirm"}
+                          </button>
+                          <button
+                            disabled={resellLoading}
+                            onClick={() => { setResellKey(null); setResellPrice(""); }}
+                            className="h-10 px-4 rounded-[10px] bg-[var(--background-secondary)]"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
