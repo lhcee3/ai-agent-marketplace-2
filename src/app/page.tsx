@@ -96,10 +96,6 @@ export default function Home() {
                  }}
             />
           </div>
-
-          {/* Animated Beams */}
-          <div className="absolute top-1/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse opacity-30" />
-          <div className="absolute top-3/4 right-0 w-full h-0.5 bg-gradient-to-l from-transparent via-blue-400 to-transparent animate-pulse opacity-20" style={{ animationDelay: '1s' }} />
         </div>
 
         <div className="relative z-10 px-6 md:px-10 lg:px-16 xl:px-24 w-full">
