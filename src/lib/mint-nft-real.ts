@@ -27,7 +27,7 @@ export function useMintAgentNFT() {
       const signer = await new BrowserProvider(provider).getSigner();
       const address = contractAddress || SMART_CONTRACTS.AI_AGENT_NFT;
       const contract = new Contract(address, AI_AGENT_NFT_ABI, signer);
-      const tx = await contract.mintAgent(name, image, description, systemPrompt, tokenURI);
+      const tx = await contract.mintAgent(name, image, description, systemPrompt, tokenURI, { gasLimit: 500000 });
       await tx.wait();
       setTxHash(tx.hash);
       return { txHash: tx.hash };
