@@ -82,7 +82,7 @@ export default function MarketplacePage() {
         break;
     }
     return d;
-  }, [category, query, sort, listings]);
+  }, [query, sort, listings]);
 
   const total = data.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));

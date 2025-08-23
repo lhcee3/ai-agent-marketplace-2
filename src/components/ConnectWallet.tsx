@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -17,6 +18,7 @@ function short(addr?: string) {
 }
 
 export default function ConnectWallet() {
+  const router = useRouter();
   const [address, setAddress] = useState<string | null>(null);
   const [authAddress, setAuthAddress] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -121,7 +123,9 @@ export default function ConnectWallet() {
   const onClick = useCallback(() => {
     if (!isConnected) return connect();
     if (!isAuthenticated) return signIn();
-  }, [isConnected, isAuthenticated, connect, signIn]);
+    // If authenticated, go to profile
+    router.push("/profile");
+  }, [isConnected, isAuthenticated, connect, signIn, router]);
 
   return (
     <div className="flex items-center gap-2">

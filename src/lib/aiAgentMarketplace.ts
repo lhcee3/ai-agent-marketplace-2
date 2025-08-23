@@ -1,6 +1,6 @@
 "use client";
 
-import { BrowserProvider, Contract, Eip1193Provider, formatEther, parseEther } from "ethers";
+import { Contract, formatEther, parseEther } from "ethers";
 import { getPublicProvider, getSigner } from "./eth";
 
 // Marketplace deployed on Fuji
@@ -66,7 +66,7 @@ export const AI_AGENT_MARKETPLACE_ABI = [
       { indexed: false, internalType: "uint256", name: "listingId", type: "uint256" },
       { indexed: true, internalType: "address", name: "nftContract", type: "address" },
       { indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
-      { indexed: true, internalType: "address", name: "seller", type: "address" },
+      { indexed: false, internalType: "address", name: "seller", type: "address" },
       { indexed: false, internalType: "uint256", name: "price", type: "uint256" },
     ],
     name: "AgentListed",
@@ -76,11 +76,28 @@ export const AI_AGENT_MARKETPLACE_ABI = [
     anonymous: false,
     inputs: [
       { indexed: false, internalType: "uint256", name: "listingId", type: "uint256" },
-      { indexed: true, internalType: "address", name: "buyer", type: "address" },
+      { indexed: false, internalType: "address", name: "buyer", type: "address" },
       { indexed: false, internalType: "uint256", name: "price", type: "uint256" },
     ],
     name: "AgentSold",
     type: "event",
+  },
+  // public mapping getter: listings(uint256) -> struct
+  {
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "listings",
+    outputs: [
+      { internalType: "uint256", name: "listingId", type: "uint256" },
+      { internalType: "address", name: "nftContract", type: "address" },
+      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      { internalType: "address", name: "seller", type: "address" },
+      { internalType: "address", name: "buyer", type: "address" },
+      { internalType: "uint256", name: "price", type: "uint256" },
+      { internalType: "bool", name: "sold", type: "bool" },
+      { internalType: "bool", name: "canceled", type: "bool" },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
 ];
 
@@ -238,4 +255,82 @@ export async function buyListing(listingId: string, priceWei: string) {
   const mp = await getMarketplaceWriteContract();
   const tx = await mp.buyAgent(BigInt(listingId), { value: BigInt(priceWei) });
   return tx;
+}
+
+// Fetch purchases for a buyer by scanning AgentSold events and reading listing details
+export async function fetchMyPurchases(buyerAddress: string, lookbackBlocks = 20_000, chunkSize = 2_000): Promise<ListingWithMetadata[]> {
+  const provider = getPublicProvider();
+  const mp = new Contract(AI_AGENT_MARKETPLACE_ADDRESS, AI_AGENT_MARKETPLACE_ABI, provider);
+  const currentBlock = await provider.getBlockNumber();
+  const minBlock = Math.max(0, currentBlock - lookbackBlocks);
+
+  const events: Array<{ listingId: string; buyer: string; blockNumber: number }> = [];
+  let to = currentBlock;
+  while (to >= minBlock) {
+    const from = Math.max(minBlock, to - chunkSize + 1);
+    try {
+      const logs = await mp.queryFilter(mp.filters.AgentSold(), from, to);
+      for (const ev of logs) {
+        const args = (ev as unknown as { args?: Record<string, unknown> }).args ?? {};
+        const buyer = (args["buyer"] as string) ?? "";
+        if (buyer.toLowerCase() === buyerAddress.toLowerCase()) {
+          const listingId = (args["listingId"] as { toString?: () => string } | undefined)?.toString?.();
+          if (listingId) events.push({ listingId, buyer, blockNumber: ev.blockNumber ?? 0 });
+        }
+      }
+    } catch {
+      // ignore
+    }
+    if (from === 0) break;
+    to = from - 1;
+  }
+
+  // Deduplicate by listingId (keep newest block)
+  const latestById = new Map<string, number>();
+  for (const e of events) {
+    const prev = latestById.get(e.listingId) ?? -1;
+    if (e.blockNumber >= prev) latestById.set(e.listingId, e.blockNumber);
+  }
+  const listingIds = Array.from(latestById.keys());
+
+  const results: ListingWithMetadata[] = [];
+  for (const id of listingIds) {
+    try {
+      const row = await mp.listings(BigInt(id));
+      const base: AgentListing = {
+        listingId: (row.listingId as bigint).toString(),
+        nftContract: row.nftContract as string,
+        tokenId: (row.tokenId as bigint).toString(),
+        seller: row.seller as string,
+        buyer: row.buyer as string,
+        priceWei: (row.price as bigint).toString(),
+        priceEth: formatEther(row.price as bigint),
+      };
+
+      // enrich
+      let metadata: ListingWithMetadata["metadata"] = null;
+      let tokenURI: string | null = null;
+      try {
+        const nft = new Contract(base.nftContract, AIAgentNFT_METADATA_ABI, provider);
+        const md = await nft.getAgentMetadata(base.tokenId);
+        metadata = {
+          name: md.name as string,
+          image: md.image as string,
+          description: md.description as string,
+          systemPrompt: md.systemPrompt as string,
+        };
+      } catch {
+        try {
+          const nft = new Contract(base.nftContract, ERC721_MIN_ABI, provider);
+          tokenURI = (await nft.tokenURI(base.tokenId)) as string;
+        } catch {}
+      }
+      results.push({ ...base, metadata, tokenURI });
+    } catch {
+      // skip problematic ids
+    }
+  }
+  // sort newest first by block number known only in events; as a proxy, use listingId desc
+  results.sort((a, b) => Number(b.listingId) - Number(a.listingId));
+  return results;
 }
