@@ -6,11 +6,30 @@ type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
   on?: (event: string, handler: (...args: unknown[]) => void) => void;
   removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+  isAvalanche?: boolean;
+  isMetaMask?: boolean;
 };
 
 declare global {
-  interface Window { ethereum?: EthereumProvider }
+  interface Window { 
+    ethereum?: EthereumProvider;
+    avalanche?: EthereumProvider;
+  }
 }
+
+// Avalanche C-Chain configuration
+const AVALANCHE_CHAIN_ID = '0xa86a'; // 43114 in hex
+const AVALANCHE_NETWORK = {
+  chainId: AVALANCHE_CHAIN_ID,
+  chainName: 'Avalanche Network',
+  nativeCurrency: {
+    name: 'AVAX',
+    symbol: 'AVAX',
+    decimals: 18,
+  },
+  rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+  blockExplorerUrls: ['https://snowtrace.io/'],
+};
 
 function short(addr?: string) {
   return addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : "";
@@ -59,12 +78,39 @@ export default function ConnectWallet() {
   const isAuthenticated = !!authAddress;
 
   const connect = useCallback(async () => {
-    if (!window.ethereum) {
-      alert("No wallet detected. Please install MetaMask or a compatible EVM wallet.");
+    // Try Core Wallet first (for Avalanche), then fallback to other wallets
+    const provider = window.avalanche || window.ethereum;
+    
+    if (!provider) {
+      alert("No wallet detected. Please install Core Wallet (https://core.app/) or MetaMask.");
       return;
     }
+
     try {
-  const accounts = (await window.ethereum.request({ method: "eth_requestAccounts" })) as string[];
+      // Check if we're on Avalanche network, if not, try to switch
+      try {
+        const chainId = await provider.request({ method: 'eth_chainId' });
+        if (chainId !== AVALANCHE_CHAIN_ID) {
+          try {
+            await provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: AVALANCHE_CHAIN_ID }],
+            });
+          } catch (switchError: unknown) {
+            // If network doesn't exist, add it
+            if (switchError && typeof switchError === 'object' && 'code' in switchError && switchError.code === 4902) {
+              await provider.request({
+                method: 'wallet_addEthereumChain',
+                params: [AVALANCHE_NETWORK],
+              });
+            }
+          }
+        }
+      } catch (networkError) {
+        console.warn('Could not switch to Avalanche network:', networkError);
+      }
+
+      const accounts = (await provider.request({ method: "eth_requestAccounts" })) as string[];
       setAddress(accounts?.[0] ?? null);
     } catch (e: unknown) {
       console.error(e);

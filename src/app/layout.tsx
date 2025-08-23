@@ -24,7 +24,13 @@ export default function RootLayout({
               <div className="size-8 rounded-md bg-cta" />
               <div className="h5-space-mono text-[22px]">AI Agent Marketplace</div>
             </Link>
-            <ClientHeader />
+            <nav className="hidden md:flex items-center gap-6 h5-work-sans text-[16px]">
+              <Link className="hover:opacity-80" href="/marketplace">Marketplace</Link>
+              <Link className="hover:opacity-80" href="/playground">Playground</Link>
+              <Link className="hover:opacity-80" href="/avalanche">Avalanche</Link>
+              <Link className="hover:opacity-80" href="/docs">Docs</Link>
+              <ConnectWallet />
+            </nav>
             <button className="md:hidden inline-flex items-center justify-center size-10 rounded-[14px] bg-[var(--background-secondary)]">
               <span className="sr-only">Menu</span>
               <div className="w-5 h-0.5 bg-white mb-1.5" />
@@ -32,7 +38,6 @@ export default function RootLayout({
             </button>
           </div>
         </header>
-
         {children}
       </body>
     </html>
