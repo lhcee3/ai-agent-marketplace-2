@@ -5,6 +5,14 @@ import { ensureFujiNetwork, requestAccounts } from "@/lib/eth";
 import { AI_AGENT_NFT_ADDRESS, getWriteContract } from "@/lib/aiAgentNft";
 import { AI_AGENT_MARKETPLACE_ADDRESS, getListingFeeWei, listAgentForSale } from "@/lib/aiAgentMarketplace";
 
+function ipfsToHttp(url?: string) {
+  if (!url) return url;
+  if (url.startsWith("ipfs://")) {
+    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+  }
+  return url;
+}
+
 export default function CreateAgentPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -294,7 +302,7 @@ export default function CreateAgentPage() {
                 <div className="aspect-square w-full rounded-[16px] bg-background grid place-items-center overflow-hidden">
                   {image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={image} alt="Agent preview" className="w-full h-full object-cover" />
+                    <img src={ipfsToHttp(image)} alt="Agent preview" className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-[#858584] body-work-sans">Image preview</div>
                   )}
