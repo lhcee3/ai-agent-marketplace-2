@@ -52,12 +52,20 @@ export default function MarketplacePage() {
     };
   }, []);
 
+  function ipfsToHttp(url?: string) {
+    if (!url) return url;
+    if (url.startsWith("ipfs://")) {
+      return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+    }
+    return url;
+  }
+
   const data = useMemo(() => {
     let d: UiAgent[] = listings.map((m) => ({
       listingId: m.listingId,
       tokenId: m.tokenId,
       name: m.metadata?.name || `Agent #${m.tokenId}`,
-      image: m.metadata?.image,
+      image: ipfsToHttp(m.metadata?.image),
       owner: m.seller,
       priceEth: m.priceEth,
       nftContract: m.nftContract,
