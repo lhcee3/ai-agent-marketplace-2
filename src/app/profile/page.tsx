@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchMyPurchases, type ListingWithMetadata } from "@/lib/aiAgentMarketplace";
+import Link from "next/link";
 
 type EthereumProvider = { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
 
@@ -125,11 +126,18 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <div className="p-6">
-                    <div className="h5-work-sans text-[22px]">{a.metadata?.name || `Agent #${a.tokenId}`}</div>
+                    <Link href={`/profile/agent/${a.nftContract}/${a.tokenId}`} className="h5-work-sans text-[22px] hover:underline">
+                      {a.metadata?.name || `Agent #${a.tokenId}`}
+                    </Link>
                     <div className="body-space-mono text-sm text-[#858584] mt-1">Bought for {a.priceEth} AVAX</div>
                     {a.metadata?.description && (
                       <p className="body-work-sans text-[#c9c9c9] mt-2 line-clamp-3">{a.metadata.description}</p>
                     )}
+                    <div className="mt-3">
+                      <Link href={`/chat/${a.nftContract}/${a.tokenId}`} className="h-10 px-4 rounded-[14px] bg-cta inline-flex items-center">
+                        Chat
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}

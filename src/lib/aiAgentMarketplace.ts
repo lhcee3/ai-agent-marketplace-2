@@ -215,7 +215,8 @@ export async function fetchAvailableListings(): Promise<ListingWithMetadata[]> {
         name: md.name as string,
         image: md.image as string,
         description: md.description as string,
-        systemPrompt: md.systemPrompt as string,
+        // Do not expose systemPrompt client-side
+        systemPrompt: "",
       };
     } catch {
       try {
@@ -317,7 +318,8 @@ export async function fetchMyPurchases(buyerAddress: string, lookbackBlocks = 20
           name: md.name as string,
           image: md.image as string,
           description: md.description as string,
-          systemPrompt: md.systemPrompt as string,
+          // Do not expose systemPrompt client-side
+          systemPrompt: "",
         };
       } catch {
         try {
