@@ -81,10 +81,11 @@ export default function ConnectWallet() {
       const { nonce } = await nr.json();
       const ts = new Date().toISOString();
       const message = `AI Agent Marketplace wants you to sign in\n\nAddress: ${address}\nNonce: ${nonce}\nTimestamp: ${ts}`;
-  const signature = (await window.ethereum.request({
+      const hexMessage = '0x' + Buffer.from(message, 'utf8').toString('hex');
+      const signature = (await window.ethereum.request({
         method: "personal_sign",
-        params: [message, address],
-  })) as string;
+        params: [hexMessage, address],
+      })) as string;
       const resp = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
