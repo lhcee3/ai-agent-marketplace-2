@@ -14,7 +14,7 @@ export function useMintAgentNFT() {
     description: string;
     systemPrompt: string;
     tokenURI: string;
-    provider: any;
+    provider: import('ethers').Eip1193Provider;
     contractAddress?: string;
   }) => {
     setMinting(true);
@@ -63,8 +63,12 @@ export function useMintAgentNFT() {
       });
 
       return { txHash: tx.hash };
-    } catch (err: any) {
-      setError(err.message || 'Minting failed');
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError((err as { message?: string }).message || 'Minting failed');
+      } else {
+        setError('Minting failed');
+      }
       throw err;
     } finally {
       setMinting(false);
@@ -78,7 +82,7 @@ export function useMintAgentNFT() {
 export async function mintAgentNFTWithUserWallet({ walletAddress, tokenURI, provider, contractAddress }: {
   walletAddress: string;
   tokenURI: string;
-  provider: any;
+    provider: import('ethers').Eip1193Provider;
   contractAddress?: string;
 }): Promise<{ txHash: string; tokenId: string }> {
   if (!provider) throw new Error('No wallet provider found');
