@@ -44,6 +44,7 @@ export default function Home() {
             <nav className="hidden md:flex items-center gap-8 h5-work-sans text-[16px]">
               <Link className="text-blue-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm transition-all duration-300" href="/marketplace">Marketplace</Link>
               <Link className="text-blue-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm transition-all duration-300" href="/create">Create</Link>
+              <Link className="text-blue-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm transition-all duration-300" href="/presets">Presets</Link>
               <Link className="text-blue-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm transition-all duration-300" href="/docs">Docs</Link>
               <div className="relative">
                 <ConnectWallet />
@@ -107,7 +108,7 @@ export default function Home() {
               {/* Main Title with Glitch Effect */}
               <div className="space-y-4">
                 <h1 className="relative">
-                  <span className="block text-[clamp(3rem,8vw,7rem)] font-black leading-[0.9] tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-400 bg-clip-text text-transparent animate-pulse">
+                  <span className="block text-[clamp(3rem,8vw,7rem)] font-black leading-[0.9] tracking-tight bg-gradient-to-r from-white via-blue-200 to-blue-400 bg-clip-text text-transparent">
                     DEPLOY
                   </span>
                   <span className="block text-[clamp(3rem,8vw,7rem)] font-black leading-[0.9] tracking-tight bg-gradient-to-r from-blue-400 via-blue-200 to-white bg-clip-text text-transparent">
@@ -132,7 +133,7 @@ export default function Home() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center xl:justify-start pt-4">
-                <button className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
+                <Link href="/create" className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <span className="relative z-10 flex items-center gap-2">
                     LAUNCH CONSOLE
@@ -140,16 +141,16 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </span>
-                </button>
+                </Link>
                 
-                <button className="group px-8 py-4 border-2 border-blue-400/50 rounded-full font-semibold text-blue-200 hover:bg-blue-900/30 hover:border-blue-300 transition-all duration-300 backdrop-blur-sm">
+                <Link href="/docs" className="group px-8 py-4 border-2 border-blue-400/50 rounded-full font-semibold text-blue-200 hover:bg-blue-900/30 hover:border-blue-300 transition-all duration-300 backdrop-blur-sm">
                   <span className="flex items-center gap-2">
                     EXPLORE DOCS
                     <svg className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </span>
-                </button>
+                </Link>
               </div>
 
               {/* Live Stats Bar */}
@@ -878,15 +879,15 @@ export default function Home() {
           </div>
           
           <div className="text-center mt-12">
-            <a 
-              href="/marketplace" 
+            <Link 
+              href="/presets" 
               className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-blue-950/40 backdrop-blur-md border border-blue-400/30 text-blue-200 hover:text-white hover:bg-blue-900/40 transition-all duration-300"
             >
               Explore All Categories
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -1173,7 +1174,7 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               {/* Filling Button 1 */}
-              <a href="/marketplace" className="group relative overflow-hidden px-8 py-4 rounded-full border border-blue-400/30 text-blue-200 font-medium transition-all duration-500 hover:text-white">
+              <Link href="/marketplace" className="group relative overflow-hidden px-8 py-4 rounded-full border border-blue-400/30 text-blue-200 font-medium transition-all duration-500 hover:text-white">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 transform scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
                 <span className="relative z-10 flex items-center gap-2">
                   Explore Marketplace
@@ -1181,10 +1182,10 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
-              </a>
+              </Link>
               
               {/* Filling Button 2 */}
-              <a href="/create" className="group relative overflow-hidden px-8 py-4 rounded-full bg-white/5 backdrop-blur-md border border-white/20 text-white font-medium transition-all duration-500">
+              <Link href="/create" className="group relative overflow-hidden px-8 py-4 rounded-full bg-white/5 backdrop-blur-md border border-white/20 text-white font-medium transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-400/20 transform scale-y-0 origin-bottom group-hover:scale-y-100 transition-transform duration-500 ease-out" />
                 <span className="relative z-10 flex items-center gap-2">
                   Create AI Agent
@@ -1192,7 +1193,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -1348,7 +1349,7 @@ export default function Home() {
           {/* Call to Action */}
           <div className="text-center mt-20">
             <div className="inline-flex flex-col sm:flex-row gap-4">
-              <button className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
+              <Link href="/marketplace" className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center gap-2">
                   Start Your Journey
@@ -1356,7 +1357,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
-              </button>
+              </Link>
               
               <button className="group px-8 py-4 border-2 border-blue-400/50 rounded-full font-semibold text-blue-200 hover:bg-blue-900/30 hover:border-blue-300 transition-all duration-300 backdrop-blur-sm">
                 <span className="flex items-center gap-2">
@@ -1539,13 +1540,6 @@ export default function Home() {
             </ul>
           </div>
           <div>
-            <div className="h5-work-sans text-[22px] mb-4">Join our community</div>
-            <div className="flex gap-3">
-              <div className="size-9 rounded-full bg-[var(--background-secondary)]" />
-              <div className="size-9 rounded-full bg-[var(--background-secondary)]" />
-              <div className="size-9 rounded-full bg-[var(--background-secondary)]" />
-              <div className="size-9 rounded-full bg-[var(--background-secondary)]" />
-            </div>
           </div>
         </div>
   <div className="px-6 md:px-10 lg:px-16 xl:px-24 py-6 text-[#858584] border-t border-white/10 body-space-mono text-sm">© {new Date().getFullYear()} Synaptica. All rights reserved.</div>
