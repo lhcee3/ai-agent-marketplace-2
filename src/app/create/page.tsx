@@ -123,7 +123,19 @@ export default function CreateAgentPage() {
 
       // Mint on-chain
       const contract = await getWriteContract();
-      const tx = await contract.mintAgent(name, image, description, systemPrompt, uri);
+      // Set EIP-1559 gas parameters to avoid underpriced transaction errors
+      const { parseUnits } = await import("ethers");
+      const tx = await contract.mintAgent(
+        name,
+        image,
+        description,
+        systemPrompt,
+        uri,
+        {
+          maxFeePerGas: parseUnits("50", "gwei"),
+          maxPriorityFeePerGas: parseUnits("2", "gwei"),
+        }
+      );
       setTxHash(tx.hash);
       const receipt = await tx.wait();
       // Read tokenId from events (Transfer event from 0x0 -> minter)
