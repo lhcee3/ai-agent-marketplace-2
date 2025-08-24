@@ -14,6 +14,15 @@ function getEthereum(): EthereumProvider | undefined {
   return (window as unknown as { ethereum?: EthereumProvider }).ethereum;
 }
 
+// Utility to convert IPFS URLs to HTTP
+function ipfsToHttp(url?: string) {
+  if (!url) return url;
+  if (url.startsWith("ipfs://")) {
+    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+  }
+  return url;
+}
+
 function short(addr?: string) {
   return addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : "";
 }
@@ -164,7 +173,7 @@ export default function ProfilePage() {
                   <div className="relative aspect-square bg-gradient-to-br from-blue-900/50 to-blue-950/50 grid place-items-center overflow-hidden">
                     {a.metadata?.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.metadata.image} alt={a.metadata.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <img src={ipfsToHttp(a.metadata.image)} alt={a.metadata.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     ) : (
                       <div className="text-blue-300/70 text-lg font-medium">#{a.tokenId}</div>
                     )}
