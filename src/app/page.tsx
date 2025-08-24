@@ -1422,7 +1422,7 @@ export default function Home() {
                 <a href="https://subnets.avax.network/" target="_blank" rel="noopener noreferrer" className="flex-1 h-12 rounded-[20px] bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors duration-300 flex items-center justify-center">
                   View Explorer
                 </a>
-                <a href="https://docs.avax.network/" target="_blank" rel="noopener noreferrer" className="flex-1 h-12 rounded-[20px] border border-blue-400/30 hover:bg-blue-900/30 text-blue-200 font-medium transition-colors duration-300 flex items-center justify-center">
+                <a href="https://build.avax.network/docs" target="_blank" rel="noopener noreferrer" className="flex-1 h-12 rounded-[20px] border border-blue-400/30 hover:bg-blue-900/30 text-blue-200 font-medium transition-colors duration-300 flex items-center justify-center">
                   API Docs
                 </a>
               </div>
