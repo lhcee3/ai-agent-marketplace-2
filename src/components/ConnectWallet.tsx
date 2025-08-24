@@ -105,15 +105,6 @@ export default function ConnectWallet() {
     }
   }, [address]);
 
-  const logout = useCallback(async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setAuthAddress(null);
-      // Also clear local connection state so button shows "Connect Wallet"
-      setAddress(null);
-    } catch {}
-  }, []);
-
   const statusLabel = useMemo(() => {
     if (!isConnected) return "Connect Wallet";
     if (!isAuthenticated) return `Sign In ${short(address ?? undefined)}`;
@@ -123,27 +114,20 @@ export default function ConnectWallet() {
   const onClick = useCallback(() => {
     if (!isConnected) return connect();
     if (!isAuthenticated) return signIn();
-    // If authenticated, go to profile
-    router.push("/profile");
+    
+    // Navigate to profile page
+    router.push('/profile');
   }, [isConnected, isAuthenticated, connect, signIn, router]);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="relative">
       <button
         disabled={loading}
         onClick={onClick}
-        className="ml-2 inline-flex items-center h-10 px-4 rounded-[20px] bg-cta disabled:opacity-60"
+        className="ml-2 inline-flex items-center h-10 px-4 rounded-[20px] bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-60"
       >
         {loading ? "Please wait…" : statusLabel}
       </button>
-      {isAuthenticated && (
-        <button
-          onClick={logout}
-          className="hidden md:inline-flex items-center h-10 px-3 rounded-[14px] bg-[var(--background-secondary)]"
-        >
-          Logout
-        </button>
-      )}
     </div>
   );
 }
