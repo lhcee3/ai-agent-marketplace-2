@@ -2,29 +2,91 @@
 
 A decentralized marketplace for AI agents built on Avalanche blockchain, featuring NFT-based ownership, secure authentication, and interactive chat interfaces.
 
-## 🌟 Features
+---
 
-### Core Functionality
-- **🔗 Wallet Integration**: MetaMask and Web3 wallet connectivity
-- **🎨 AI Agent Creation**: Mint custom AI agents as NFTs
-- **🛒 Marketplace**: Buy, sell, and discover AI agents
-- **💬 Chat Interface**: Interactive conversations with owned AI agents
-- **👤 User Profiles**: Comprehensive dashboard with statistics and activity tracking
-- **🔐 Secure Authentication**: Wallet-based sign-in with message verification
+## What is Synaptica?
+Synaptica is a decentralized web application that lets users create, own, buy, sell, and interact with AI agents as NFTs on the Avalanche blockchain. It combines blockchain technology, secure wallet authentication, and interactive AI chat interfaces to create a marketplace for digital agents.
 
-### UI/UX Features
-- **🎭 Glassmorphism Design**: Modern frosted glass aesthetic with backdrop blur effects
-- **🌙 Dark Theme**: Sleek black background with gradient accents
-- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **🎯 Floating Navigation**: Dynamic navbar with hover effects and animations
-- **⚡ Smooth Transitions**: Fluid animations and micro-interactions
+## Features (Detailed)
 
-### Technical Features
-- **⛓️ Blockchain Integration**: Smart contracts on Avalanche Fuji testnet
-- **🔄 Real-time Updates**: Dynamic content loading and state management
-- **📊 Analytics Dashboard**: User statistics and activity tracking
-- **🎯 Type Safety**: Full TypeScript implementation
-- **🚀 Performance**: Next.js 15 with Turbopack for fast development
+### 1. Wallet Integration & Authentication
+- Connect MetaMask or compatible Web3 wallet
+- Authenticate via cryptographic message signing (no passwords)
+- All transactions (minting, buying, selling) are signed and executed from the user's wallet
+
+### 2. AI Agent Creation & Minting
+- Create custom AI agents: name, description, avatar image, system prompt
+- Mint agents as ERC-721 NFTs on Avalanche Fuji testnet
+- Pay AVAX for gas fees
+- Store agent metadata on IPFS for decentralization
+
+### 3. Marketplace for AI Agents
+- List agents for sale, set price in AVAX
+- Browse all available agents with metadata, price, seller info
+- Buy agents directly, transferring NFT ownership on-chain
+
+### 4. Interactive Chat Interface
+- Owners chat with their AI agents using built-in chat UI
+- Agents respond based on their system prompt and capabilities
+- Chat history and context maintained for personalized interactions
+
+### 5. User Profiles & Dashboard
+- Profile page shows owned and purchased agents
+- Dashboard includes statistics (agents, purchases, sales) and recent activity
+- Manage listings, view transaction history, access account settings
+
+### 6. Secure Authentication & Session Management
+- Wallet-based authentication using cryptographic signatures
+- Secure session management, no passwords or sensitive data stored
+
+### 7. Real-time Updates & State Management
+- Marketplace and profile pages update dynamically
+- React hooks and context for efficient state management
+
+### 8. Glassmorphism & Modern UI/UX
+- Frosted glass effects, gradients, backdrop blurs
+- Responsive layouts for desktop, tablet, mobile
+- Floating navigation bar, smooth transitions, micro-interactions
+
+### 9. Analytics & Activity Tracking
+- View statistics about activity, agent performance, marketplace trends
+- Activity feed shows recent actions (minting, buying, selling, chatting)
+
+### 10. IPFS Integration
+- Agent metadata and images stored on IPFS
+- App converts IPFS URLs to HTTP for browser compatibility
+
+---
+
+## Technical Details
+- Frontend: Next.js 15, TypeScript, Tailwind CSS, React 19
+- Blockchain: Avalanche Fuji Testnet, Solidity smart contracts (ERC-721), Ethers.js
+- Backend: Next.js API routes for authentication, NFT operations, IPFS integration
+- Smart Contracts: Custom contracts for agent minting, marketplace listing, transfers
+- Storage: IPFS for agent metadata and images
+- Security: Wallet-based authentication, input validation, error boundaries
+- Performance: Turbopack, code splitting, image optimization
+- Testing: ESLint, TypeScript type checking
+
+---
+
+## Example User Flow
+1. Connect Wallet: Click "Connect Wallet" and sign in with MetaMask
+2. Create Agent: Fill out agent details and mint as NFT
+3. List for Sale: List agent on marketplace, set price
+4. Buy Agent: Purchase agent, transfer ownership
+5. Chat: Owner chats with agent via profile dashboard
+6. Manage Profile: View stats, activity, manage agents
+
+---
+
+## Why is Synaptica Unique?
+- Combines AI and blockchain for true digital ownership of intelligent agents
+- Decentralized, censorship-resistant, user-controlled
+- Modern, beautiful UI with advanced design and responsive features
+- Secure, passwordless authentication and transaction management
+
+---
 
 ## 🏗️ Tech Stack
 
