@@ -168,6 +168,43 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+
+              {/* Core Wallet Integration Banner */}
+              <div className="pt-8">
+                <a 
+                  href="https://core.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group relative flex items-center justify-center xl:justify-start p-6 bg-gradient-to-r from-orange-600/20 via-red-600/20 to-orange-600/20 border border-orange-500/30 rounded-2xl backdrop-blur-sm hover:border-orange-400/50 hover:from-orange-600/30 hover:via-red-600/30 hover:to-orange-600/30 transition-all duration-300 overflow-hidden"
+                >
+                  {/* Animated Background Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Core Logo/Icon */}
+                  <div className="relative z-10 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                      </svg>
+                    </div>
+                    
+                    <div className="text-left">
+                      <div className="text-white font-semibold text-lg flex items-center gap-2">
+                        Use with Core Wallet
+                        <svg className="w-4 h-4 text-orange-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </div>
+                      <div className="text-orange-200/80 text-sm">
+                        Download the official Avalanche wallet to interact with AI agents
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Glowing Border Effect */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
+                </a>
+              </div>
             </div>
 
             {/* Right: Futuristic AI Marketplace Visualization */}
