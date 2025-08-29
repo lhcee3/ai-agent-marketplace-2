@@ -70,7 +70,7 @@ export default function CreateAgentPage() {
         };
         xhr.send(formData);
       });
-    } catch (err) {
+    } catch {
       setError("Image upload failed");
     } finally {
       setUploading(false);
